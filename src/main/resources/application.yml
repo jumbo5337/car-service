@@ -3,3 +3,10 @@
 car-service:
   app-verison: '0.0.1'
   schema-verison: '0.0.1'
+
+spring:
+  datasource:
+    generate-unique-name: false
+    name: 'car_service'
+    url: 'jdbc:h2:mem:car_service;'
+    driverClassName: org.h2.Driver

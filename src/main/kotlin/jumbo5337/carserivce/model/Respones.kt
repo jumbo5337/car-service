@@ -20,3 +20,10 @@ data class Duplicate<T : Identified<*>>(
     override val code: Int = 422
     override val message: String = "${javaClass.simpleName}=[${entity.id}] already exists"
 }
+
+data class ErrorResponse(
+    val code: Int,
+    val message: String
+) {
+    constructor(e: ServiceException) : this(code = e.code, message = e.message)
+}

@@ -20,17 +20,14 @@ class SessionService(
 
 
     fun initSession(
-        rfidTagId: Long,
-        connectorId: Long,
         customerId: Long,
-        startMeter: Double,
-        startTime: LocalDateTime,
+        request: InitSessionRequest,
     ): Response<Session> {
-        val rfidTag = getRfid(rfidTagId)
+        val rfidTag = getRfid(request.rfidNumber)
         rfidTag.checkCustomer(customerId)
         rfidTag.checkVehicle()
-        rfidTag.checkConnector(connectorId)
-        val session = createSession(startMeter, startTime, connectorId, rfidTagId)
+        rfidTag.checkConnector(request.connector)
+        val session = createSession(request)
         return try {
             sessionRepository.initSession(session)
             Success(session)
@@ -42,25 +39,18 @@ class SessionService(
     }
 
     fun completeSession(
-        sessionId: UUID,
-        rfidTagId: Long,
-        connectorId: Long,
         customerId: Long,
-        endMeter: Double,
-        endTime: LocalDateTime,
+        sessionId: UUID,
+        request: CompleteSessionRequest
     ): Response<Session> {
-        val rfidTag = getRfid(rfidTagId)
+        val rfidTag = getRfid(request.rfidNumber)
         val session = getSession(sessionId)
         return try {
+            session.validateEndValues(request)
             rfidTag.checkCustomer(customerId)
             rfidTag.checkCustomer(customerId)
-            rfidTag.checkConnector(connectorId)
-            val closedSession = session.copy(
-                isCompleted = true,
-                isError = true,
-                endTime = endTime,
-                endMeter = endMeter
-            )
+            rfidTag.checkConnector(request.connector)
+            val closedSession = session.complete(request)
             if (session.isCompleted && session.isError) {
                 session.checkEndValues(closedSession)
                 Duplicate(closedSession)
@@ -81,10 +71,6 @@ class SessionService(
         sessionRepository.findById(id)
             ?: throw NotFoundException("Session=[$id]: not found")
 
-    private fun getOpenSession(rfidTag: RFIDTag): Session =
-        sessionRepository.findOpenSession(rfidTag)
-            ?: throw NotFoundException("RFID=[${rfidTag.id}]: doesn't have open session")
-
 
     private fun getRfid(rfidTagId: Long): RFIDTag =
         rfidRepository.findById(rfidTagId)
@@ -101,6 +87,13 @@ class SessionService(
             throw ConflictException("RFID=[${this.rfidTagId}]: session is open in another connector")
     }
 
+    private fun Session.validateEndValues(request: CompleteSessionRequest) {
+        if (this.startMeter > request.endMeter)
+            throw ConflictException("RFID=[${this.rfidTagId}]: session end meter is lower than start meter")
+        if (this.startTime > request.endTime)
+            throw ConflictException("RFID=[${this.rfidTagId}]: session end time is earlier than start time")
+    }
+
     private fun Session.checkEndValues(session: Session) {
         if (this.connectorId != session.connectorId)
             throw ConflictException("RFID=[${this.rfidTagId}]: session was open in another connector")
@@ -110,7 +103,7 @@ class SessionService(
 
     private fun RFIDTag.checkCustomer(anotherCustomerId: Long) {
         if (this.customerId != anotherCustomerId)
-            throw ConflictException("RFID=[$id]: is assigned to another customer")
+            throw AuthorizationException("RFID=[$id]: is assigned to another customer")
     }
 
     private fun RFIDTag.checkVehicle() {
@@ -120,24 +113,30 @@ class SessionService(
 
     private fun RFIDTag.checkConnector(connectorId: Long) {
         if (customerRepository.validateConnectorAndRfId(connectorId, this))
-            throw ConflictException("RFID=[$id]: connector [$id] is assigned to another customer")
+            throw AuthorizationException("RFID=[$id]: connector [$id] is assigned to another customer")
     }
 
+    private fun Session.complete(
+        request: CompleteSessionRequest
+    ) : Session = this.copy(
+        isCompleted = true,
+        isError = true,
+        endTime = request.endTime,
+        endMeter = request.endMeter
+    )
+
     private fun createSession(
-        startMeter: Double,
-        startTime: LocalDateTime,
-        connectorId: Long,
-        rfidTagId: Long,
+        request: InitSessionRequest
     ): Session = Session(
         id = UUID.randomUUID(),
-        startMeter = startMeter,
-        startTime = startTime,
+        startMeter = request.startMeter,
+        startTime = request.startTime,
         isError = false,
         isCompleted = false,
         endMeter = null,
         endTime = null,
-        rfidTagId = connectorId,
-        connectorId = rfidTagId,
+        rfidTagId = request.rfidNumber,
+        connectorId = request.connector,
         message = null
     )
 

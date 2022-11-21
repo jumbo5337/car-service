@@ -1,8 +1,8 @@
 
 
 car-service:
-  app-verison: '0.0.1'
-  schema-verison: '1'
+  app-version: '0.0.1'
+  schema-version: '1'
 
 spring:
   datasource:

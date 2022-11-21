@@ -20,7 +20,7 @@ class SessionController(
     ): ResponseEntity<*> {
         request.validateRequest()
         return sessionService.initSession(customerId, request).let {
-            ResponseEntity.ok(it)
+            ResponseEntity.ok(it.toOkResponse())
         }
     }
 
@@ -32,7 +32,7 @@ class SessionController(
     ): ResponseEntity<*> {
         request.validateRequest()
         return sessionService.completeSession(customerId, sessionId, request).let {
-            ResponseEntity.ok(it)
+            ResponseEntity.ok(it.toOkResponse())
         }
     }
 

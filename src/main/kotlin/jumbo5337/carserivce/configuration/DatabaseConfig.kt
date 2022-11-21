@@ -13,7 +13,7 @@ class DatabaseConfig {
     @Bean(initMethod = "migrate")
     fun flyway(
         dataSource: DataSource,
-        @Value("\${car-service.schema-verison}")
+        @Value("\${car-service.schema-version}")
         version: String
     ): Flyway = Flyway.configure()
         .dataSource(dataSource)

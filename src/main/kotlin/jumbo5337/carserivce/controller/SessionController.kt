@@ -2,7 +2,6 @@ package jumbo5337.carserivce.controller
 
 import jumbo5337.carserivce.model.CompleteSessionRequest
 import jumbo5337.carserivce.model.InitSessionRequest
-import jumbo5337.carserivce.model.Response
 import jumbo5337.carserivce.service.SessionService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

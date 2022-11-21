@@ -19,10 +19,14 @@ class RFIDRepositoryImpl(
     private val tableName = "RFID_TAGS"
 
     override fun findById(rfidTagId: Long): RFIDTag? {
-        return jdbcTemplate.queryForObject("""
+        return kotlin.runCatching {
+            jdbcTemplate.queryForObject(
+                """
            SELECT id, tag_name, customer_id
            FROM $tableName WHERE id = ?
-       """, RFIDTagMapper, rfidTagId)
+       """, RFIDTagMapper, rfidTagId
+            )
+        }.getOrNull()
     }
 
 
@@ -32,7 +36,7 @@ class RFIDRepositoryImpl(
             override fun mapRow(rs: ResultSet, rowNum: Int): RFIDTag = rs.toRFIDTag()
         }
 
-        private fun ResultSet.toRFIDTag() : RFIDTag =
+        private fun ResultSet.toRFIDTag(): RFIDTag =
             RFIDTag(
                 id = getLong("id"),
                 name = getString("tag_name"),

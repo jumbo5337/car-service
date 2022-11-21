@@ -19,16 +19,20 @@ class VehicleRepositoryImpl(
 
     override fun isAssigned(rfidTag: RFIDTag): Boolean {
         return jdbcTemplate.query(
-            """
+                """
                 SELECT COUNT(1) as count FROM $tableName
                 WHERE rfid = ?
             """.trimIndent(),
-            PreparedStatementSetter {
-                it.setLong(1, rfidTag.id)
-            },
-            ResultSetExtractor {
-                it.getInt("count") > 0
-            }
-        ) ?: false
+                PreparedStatementSetter {
+                    it.setLong(1, rfidTag.id)
+                },
+                ResultSetExtractor {
+                    if (it.next())
+                        it.getInt(1) > 0
+                    else
+                        false
+                }
+            ) ?: false
+
     }
 }

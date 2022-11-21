@@ -107,12 +107,12 @@ class SessionService(
     }
 
     private fun RFIDTag.checkVehicle() {
-        if (vehicleRepository.isAssigned(this))
+        if (!vehicleRepository.isAssigned(this))
             throw ConflictException("RFID=[$id]: doesn't assigned to any vehicle")
     }
 
     private fun RFIDTag.checkConnector(connectorId: Long) {
-        if (customerRepository.validateConnectorAndRfId(connectorId, this))
+        if (!customerRepository.validateConnectorAndRfId(connectorId, this))
             throw AuthorizationException("RFID=[$id]: connector [$id] is assigned to another customer")
     }
 

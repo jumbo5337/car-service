@@ -11,7 +11,8 @@ import org.springframework.web.server.ServerWebInputException
 
 @ControllerAdvice(
     assignableTypes = [
-        SessionController::class
+        SessionController::class,
+        AdminController::class
     ]
 )
 class BaseControllerAdvice {

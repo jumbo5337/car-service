@@ -33,7 +33,10 @@ class CustomerRepositoryImpl(
                 it.setLong(2, connectorId)
             },
             ResultSetExtractor {
-                it.getLong("count") > 0
+                if (it.next())
+                    it.getInt("count") > 0
+                else
+                    false
             }
         ) ?: false
     }

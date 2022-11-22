@@ -1,15 +1,15 @@
 package jumbo5337.carserivce.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
 import java.time.LocalDateTime
 import java.util.*
 
 interface Identified<T> {
-    val id : T
+    val id: T
 }
-data class User(
-    val username: String,
-)
+
 
 data class Customer(
     override val id: Long,
@@ -31,7 +31,7 @@ data class RFIDTag(
     override val id: Long,
     val name: String,
     val customerId: Long,
-): Identified<Long>
+) : Identified<Long>
 
 data class Session(
     override val id: UUID,
@@ -65,12 +65,12 @@ data class SessionData(
 ) : Identified<UUID> {
 
     data class RFID(
-        val id : Long,
+        val id: Long,
         val name: String
     )
 
     data class ChargePoint(
-        val id : Long,
+        val id: Long,
         val name: String
     )
 
@@ -79,3 +79,34 @@ data class SessionData(
         val name: String
     )
 }
+
+data class UserData(
+    private val username: String,
+    private val password: String,
+    val role: GrantedAuthority,
+    val customerId: Long?
+) : UserDetails {
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = mutableListOf(role)
+
+    override fun getPassword(): String = password
+
+    override fun getUsername(): String = username
+
+    override fun isAccountNonExpired(): Boolean = true
+
+    override fun isAccountNonLocked(): Boolean = true
+
+    override fun isCredentialsNonExpired(): Boolean = true
+
+    override fun isEnabled(): Boolean = true
+}
+
+object AdminRole : GrantedAuthority {
+
+    override fun getAuthority(): String = "ADMIN"
+}
+
+object CustomerRole : GrantedAuthority {
+    override fun getAuthority(): String = "CUSTOMER"
+}
+

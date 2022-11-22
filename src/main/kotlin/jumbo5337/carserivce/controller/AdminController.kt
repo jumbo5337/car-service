@@ -1,9 +1,9 @@
 package jumbo5337.carserivce.controller
 
-import jumbo5337.carserivce.model.InitSessionRequest
 import jumbo5337.carserivce.model.SessionsResponse
 import jumbo5337.carserivce.service.AdminService
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
@@ -16,7 +16,8 @@ class AdminController(
     @GetMapping("/sessions")
     fun getSessions(
         @RequestParam("from", required = false) from: LocalDateTime?,
-        @RequestParam("to", required = false) to: LocalDateTime?
+        @RequestParam("to", required = false) to: LocalDateTime?,
+        auth: Authentication?,
     ): ResponseEntity<*> = adminService.findSessions(from, to).let {
         ResponseEntity.ok(SessionsResponse(sessions = it))
     }

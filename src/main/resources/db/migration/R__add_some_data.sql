@@ -29,3 +29,9 @@ values (1, 1),
        (2, 1),
        (3, 3),
        (4, 4);
+
+INSERT INTO USERS
+values ('admin', '$2a$12$NQ/uKmV93orJpORJHNVoRuua.3ZRfetUyldra/V9YAX.gaE2VVcUe', null, 1), -- admin
+       ('Vasya', '$2a$10$.6PbWBxaRTYS3MyMkCaXfOOnlpKrBC8E25GrLbg.yJZnLYtoHFk9C', 1, 2), -- 1234
+       ('Petya', '$2a$10$.6PbWBxaRTYS3MyMkCaXfOOnlpKrBC8E25GrLbg.yJZnLYtoHFk9C', 2, 2),
+       ('Vova', '$2a$10$.6PbWBxaRTYS3MyMkCaXfOOnlpKrBC8E25GrLbg.yJZnLYtoHFk9C', 3, 2);

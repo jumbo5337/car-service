@@ -1,9 +1,12 @@
 package jumbo5337.carserivce.controller
 
+import jumbo5337.carserivce.model.AuthorizationException
 import jumbo5337.carserivce.model.CompleteSessionRequest
 import jumbo5337.carserivce.model.InitSessionRequest
+import jumbo5337.carserivce.model.UserData
 import jumbo5337.carserivce.service.SessionService
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -15,10 +18,11 @@ class SessionController(
 
     @PostMapping("/init")
     fun openSession(
-        @RequestParam("customer") customerId: Long,
-        @RequestBody() request: InitSessionRequest
+        @RequestBody() request: InitSessionRequest,
+        auth: Authentication
     ): ResponseEntity<*> {
         request.validateRequest()
+        val customerId = (auth.principal as? UserData)?.customerId ?: throw AuthorizationException("Authorization failed")
         return sessionService.initSession(customerId, request).let {
             ResponseEntity.ok(it.toOkResponse())
         }
@@ -26,11 +30,12 @@ class SessionController(
 
     @PostMapping("{sessionId}/complete")
     fun completeSession(
-        @RequestParam("customer") customerId: Long,
         @PathVariable("sessionId") sessionId: UUID,
         @RequestBody() request: CompleteSessionRequest,
+        auth: Authentication
     ): ResponseEntity<*> {
         request.validateRequest()
+        val customerId = (auth.principal as? UserData)?.customerId ?: throw AuthorizationException("Authorization failed")
         return sessionService.completeSession(customerId, sessionId, request).let {
             ResponseEntity.ok(it.toOkResponse())
         }

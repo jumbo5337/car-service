@@ -34,7 +34,7 @@ class UserRepositoryImpl(dataSource: DataSource) : UserRepository {
                         else -> error("Unexpected role id [${it.getInt("role")}]")
                     }
                     val customerId = it.getLong("customer_id")
-                    if (customerId == 0L) {
+                    if (customerId == 0L && role == CustomerRole) {
                         error("Customer must have customerId")
                     }
                     UserData(

@@ -2,7 +2,7 @@
 
 car-service:
   app-version: '0.0.1'
-  schema-version: '1'
+  schema-version: '2'
 
 spring:
   datasource:

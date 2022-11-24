@@ -17,7 +17,7 @@ class DatabaseConfig {
         version: String
     ): Flyway = Flyway.configure()
         .dataSource(dataSource)
-        .baselineVersion(version)
+        .target(version)
         .load()
 
 }

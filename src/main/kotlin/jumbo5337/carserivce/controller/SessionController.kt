@@ -5,6 +5,7 @@ import jumbo5337.carserivce.model.CompleteSessionRequest
 import jumbo5337.carserivce.model.InitSessionRequest
 import jumbo5337.carserivce.model.UserData
 import jumbo5337.carserivce.service.SessionService
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*

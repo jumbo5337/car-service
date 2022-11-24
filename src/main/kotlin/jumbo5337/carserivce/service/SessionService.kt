@@ -5,10 +5,12 @@ import jumbo5337.carserivce.repository.CustomerRepository
 import jumbo5337.carserivce.repository.RFIDRepository
 import jumbo5337.carserivce.repository.SessionRepository
 import jumbo5337.carserivce.repository.VehicleRepository
+import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.*
+import java.util.logging.Logger
 
 @Service
 class SessionService(
@@ -18,11 +20,13 @@ class SessionService(
     private val sessionRepository: SessionRepository,
 ) {
 
+    private val logger =  LoggerFactory.getLogger(javaClass)
 
     fun initSession(
         customerId: Long,
         request: InitSessionRequest,
     ): Response<Session> {
+        logger.info("customer=[$customerId]: got [$request]")
         val rfidTag = getRfid(request.rfidNumber)
         rfidTag.checkCustomer(customerId)
         rfidTag.checkVehicle()
@@ -30,10 +34,12 @@ class SessionService(
         val session = createSession(request)
         return try {
             sessionRepository.initSession(session)
+            logger.info("customer=[$customerId]: init session with id [${session.id}]")
             Success(session)
         } catch (e: DuplicateKeyException) {
             val session = sessionRepository.findOpenSession(rfidTag)!!
             session.checkStartValues(session)
+            logger.info("customer=[$customerId]: session with id [${session.id}] already exists")
             Duplicate(session)
         }
     }
@@ -43,6 +49,7 @@ class SessionService(
         sessionId: UUID,
         request: CompleteSessionRequest
     ): Response<Session> {
+        logger.info("customer=[$customerId]: got [$request]")
         val rfidTag = getRfid(request.rfidNumber)
         val session = getSession(sessionId)
         return try {
@@ -53,9 +60,11 @@ class SessionService(
             val closedSession = session.complete(request)
             if (session.isCompleted && session.isError) {
                 session.checkEndValues(closedSession)
+                logger.info("customer=[$customerId]: session with id [${session.id}] already completed")
                 Duplicate(closedSession)
             } else {
                 sessionRepository.completeSession(closedSession)
+                logger.info("customer=[$customerId]: complete session with id [${session.id}]")
                 Success(closedSession)
             }
         } catch (e: Exception) {
